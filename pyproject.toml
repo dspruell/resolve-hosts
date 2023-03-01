@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resolve-hosts"
+version = "0.0.1"
+authors = [
+    { name="Darren Spruell", email="dspruell@sancho2k.net" },
+]
+description = "Resolve list of DNS hostnames."
+readme = "README.md"
+dependencies = [
+    "dnspython",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+a-lookup = "resolve_hosts:cli"
+resolve-hosts = "resolve_hosts:cli"
+
+[project.urls]
+"Homepage" = "https://github.com/dspruell/resolve-hosts"
