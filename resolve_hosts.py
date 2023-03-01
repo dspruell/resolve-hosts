@@ -6,9 +6,8 @@ from json import dumps as json_dumps
 import logging
 
 from dns import query
-
-# from dns.resolver import resolve
-from dns.resolver import Resolver, resolve
+from dns.resolver import Resolver, resolve, NXDOMAIN
+from tabulate import tabulate
 
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
@@ -35,8 +34,7 @@ def cli():
     parser.add_argument(
         "infile",
         type=argparse.FileType("r"),
-        help=("source input for list of names to resolve "
-              "(default: standard input)"),
+        help=("source input for list of names to resolve (default: standard input)"),
     )
     parser.add_argument(
         "-s",
@@ -67,18 +65,17 @@ def cli():
             resolver_kwargs["resolvers"],
         )
 
+    resp_data = []
     resolver = Resolver()
     if resolver_kwargs["resolvers"]:
         resolver.nameservers = resolver_kwargs["resolvers"]
 
     for fqdn in args.infile:
-        answer = resolver.resolve(fqdn.strip())
-        print(answer)
-    #   answer.qname
-    #   answer.rrset
-    #
-    #
+        fqdn = fqdn.strip()
+        try:
+            answer = resolver.resolve(fqdn)
+        except NXDOMAIN:
+            answer = ["NXDOMAIN"]
+        resp_data.append((fqdn, " ".join([str(addr) for addr in answer])))
 
-    # results = []
-    # for host in args.infile:
-    #    query
+    print(tabulate(resp_data, tablefmt="plain"))
