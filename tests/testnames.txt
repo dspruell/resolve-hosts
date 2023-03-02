@@ -2,3 +2,5 @@ www.example.com
 blocked.test.on.quad9.net
 mxs.mail.ru
 magnolia.ns.cloudflare.com
+# Comment lines and blank lines should be skipped in processing input.
+
