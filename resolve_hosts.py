@@ -1,6 +1,7 @@
-"Resolve list of DNS hostnames."
+"""Resolve list of DNS hostnames."""
 
 import argparse
+from importlib.metadata import version
 from ipaddress import ip_address
 import logging
 import sys
@@ -14,12 +15,19 @@ except ImportError:
     from json import dumps as json_dumps
 
 
+__application_name__ = "resolve-hosts"
+__version__ = version(__application_name__)
+
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
 def resolve_servers(servers: list) -> list:
-    "Return IP addresses of input DNS servers, after resolving any hostnames."
+    """
+    Resolve specified resolvers.
 
+    Return IP addresses of input DNS servers, after resolving any
+    hostnames.
+    """
     results = []
     for s in servers:
         try:
@@ -33,6 +41,7 @@ def resolve_servers(servers: list) -> list:
 
 
 def cli():
+    """Run main CLI."""
     description = "Resolve list of DNS hostnames."
     epilog = (
         "Additional resolvers may be specified by passing multiple "
@@ -57,6 +66,13 @@ def cli():
     )
     parser.add_argument(
         "-d", "--debug", action="store_true", help="enable debug output"
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=__version__,
+        help="print package version",
     )
     args = parser.parse_args()
 
