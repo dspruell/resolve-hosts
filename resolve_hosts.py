@@ -1,12 +1,12 @@
 """Resolve list of DNS hostnames."""
 
 import argparse
-from importlib.metadata import version
-from ipaddress import ip_address
 import logging
 import sys
+from importlib.metadata import version
+from ipaddress import ip_address
 
-from dns.resolver import Resolver, resolve, NXDOMAIN
+from dns.resolver import NXDOMAIN, NoAnswer, Resolver, resolve
 from tabulate import tabulate
 
 try:
@@ -111,6 +111,8 @@ def cli():
             answer = resolver.resolve(fqdn)
         except NXDOMAIN:
             answer = ["NXDOMAIN"]
+        except NoAnswer:
+            answer = ["NODATA (no answer)"]
         if args.json:
             resp_data.append({fqdn: [str(addr) for addr in answer]})
         else:
