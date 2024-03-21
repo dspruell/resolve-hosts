@@ -7,24 +7,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resolve-hosts"
-version = "0.1.4"
+version = "0.2.0"
 authors = [
     { name="Darren Spruell", email="dspruell@sancho2k.net" },
 ]
 description = "Resolve list of DNS hostnames."
 readme = "README.md"
 dependencies = [
+    "aslookup",
     "dnspython",
     "tabulate",
     "ujson",
+    "whois-format",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
 [project.scripts]
-a-lookup = "resolve_hosts:cli"
-resolve-hosts = "resolve_hosts:cli"
+resolve-hosts = "resolve_hosts.cli:resolve_hosts"
+probe-domain = "resolve_hosts.cli:probe_domain"
 
 [project.urls]
 "Homepage" = "https://github.com/dspruell/resolve-hosts"
