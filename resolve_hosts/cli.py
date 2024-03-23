@@ -10,6 +10,7 @@ from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer
 from tabulate import tabulate
 
 from .resolver import get_resolver
+from .whois import get_domain_summary
 
 try:
     from ujson import dumps as json_dumps
@@ -126,6 +127,9 @@ def probe_domain():
 
     resp_data = {}
 
+    domain_reg = get_domain_summary(domain)
+    resp_data.update({"WHOIS": domain_reg})
+
     # Process SOA and NS records by converting to string blobs and adding to
     # output.
     for rdtype in ("SOA", "NS"):
@@ -157,6 +161,7 @@ def probe_domain():
     print(
         "\n\n".join(
             [
+                resp_data["WHOIS"],
                 resp_data["SOA"],
                 resp_data["NS"],
                 resp_data["A"],
