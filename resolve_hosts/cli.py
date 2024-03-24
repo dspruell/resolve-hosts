@@ -6,7 +6,7 @@ import sys
 from importlib.metadata import version
 
 from aslookup.lookup import get_as_data
-from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer
+from dns.resolver import NXDOMAIN, LifetimeTimeout, NoAnswer, NoNameservers
 from tabulate import tabulate
 
 from .resolver import get_resolver
@@ -128,7 +128,8 @@ def probe_domain():
     resp_data = {}
 
     domain_reg = get_domain_summary(domain)
-    resp_data.update({"WHOIS": domain_reg})
+    if domain_reg:
+        resp_data.update({"WHOIS": domain_reg})
 
     # Process SOA and NS records by converting to string blobs and adding to
     # output.
@@ -137,11 +138,22 @@ def probe_domain():
             answer = resolver.resolve(domain, rdtype, search=False)
             resp_data.update({rdtype: str(answer.rrset)})
         except NXDOMAIN:
-            resp_data.update({rdtype: "NXDOMAIN"})
+            logging.warning(
+                "%s (%s record) returned %s", domain, rdtype, "NXDOMAIN"
+            )
         except NoAnswer:
-            resp_data.update({rdtype: "NODATA (no answer)"})
+            logging.warning(
+                "%s (%s record) returned %s",
+                domain,
+                rdtype,
+                "NODATA (no answer)",
+            )
         except LifetimeTimeout as e:
             parser.error(f"failed to resolve domain: {e}")
+        except NoNameservers as e:
+            logging.warning(
+                "%s (%s record) returned error: %s", domain, rdtype, e
+            )
 
     # Process A records by converting to string blobs and adding to output.
     # Additionally perform ASN lookups and add to output.
@@ -154,18 +166,20 @@ def probe_domain():
             asdata = get_as_data(addr, "cymru")
             resp_data["ASN"].append(asdata.as_text())
     except NXDOMAIN:
-        resp_data.update({"A": "NXDOMAIN"})
+        logging.warning("%s (A record) returned %s", domain, "NXDOMAIN")
     except NoAnswer:
-        resp_data.update({"A": "NODATA (no answer)"})
-
-    print(
-        "\n\n".join(
-            [
-                resp_data["WHOIS"],
-                resp_data["SOA"],
-                resp_data["NS"],
-                resp_data["A"],
-                "\n".join(resp_data["ASN"]),
-            ]
+        logging.warning(
+            "%s (A record) returned %s", domain, "NODATA (no answer)"
         )
-    )
+
+    output_data = {}
+    for d in ["WHOIS", "SOA", "NS", "A"]:
+        if resp_data.get(d):
+            output_data.update({d: resp_data.get(d)})
+
+    logging.debug("resp_data: %s", resp_data)
+
+    if resp_data.get("ASN"):
+        output_data.update({"ASN": "\n".join(resp_data["ASN"])})
+
+    print("\n\n".join([v for k, v in output_data.items()]))
