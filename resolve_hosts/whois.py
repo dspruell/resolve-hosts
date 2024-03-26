@@ -6,15 +6,18 @@ from tabulate import tabulate
 from whois_format import get_domain_whois
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_domain_summary(domain):
     """Return summary domain information.
 
     Query WHOIS for information on given domain and return in conpact form.
     """
     resp_data = get_domain_whois([domain])
-    logging.debug("resp_data: %s", resp_data)
+    logger.debug("resp_data: %s", resp_data)
     if resp_data["warnings"]:
-        logging.warning(
+        logger.warning(
             "error in domain lookup: %s",
             "\n".join([f"{d}: {m}" for d, m in resp_data["warnings"]]),
         )

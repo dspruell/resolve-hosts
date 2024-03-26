@@ -6,6 +6,9 @@ from ipaddress import ip_address
 from dns.resolver import Resolver, resolve
 
 
+logger = logging.getLogger(__name__)
+
+
 def resolve_servers(servers: list) -> list:
     """
     Resolve specified resolvers.
@@ -40,7 +43,7 @@ def get_resolver(servers: list = []) -> Resolver:
     # if args.server is not an IP, resolve it first
     if servers:
         res_addrs = resolve_servers(servers)
-        logging.debug(
+        logger.debug(
             "effective resolver address(es): %s",
             res_addrs,
         )
