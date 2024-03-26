@@ -22,8 +22,9 @@ __application_name__ = "resolve-hosts"
 __version__ = version(__application_name__)
 
 logging.basicConfig(
-    level=logging.INFO, format="[%(levelname)s] %(module)s: %(message)s"
+    level=logging.INFO, format="[%(levelname)s] %(name)s: %(message)s"
 )
+logger = logging.getLogger(__name__)
 
 
 # Create a common parser to support shared arguments with different entry
@@ -73,7 +74,7 @@ def resolve_hosts():
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    logging.debug(
+    logger.debug(
         "configured to use resolver(s): %s",
         args.server if args.server else "local system",
     )
@@ -88,7 +89,7 @@ def resolve_hosts():
         # comments or blank lines.
         fqdn = fqdn.strip()
         if (fqdn == "") or fqdn.startswith("#"):
-            logging.debug("skipping input: >>%s<<", fqdn)
+            logger.debug("skipping input: >>%s<<", fqdn)
             continue
         try:
             answer = resolver.resolve(fqdn)
@@ -138,11 +139,11 @@ def probe_domain():
             answer = resolver.resolve(domain, rdtype, search=False)
             resp_data.update({rdtype: str(answer.rrset)})
         except NXDOMAIN:
-            logging.warning(
+            logger.warning(
                 "%s (%s record) returned %s", domain, rdtype, "NXDOMAIN"
             )
         except NoAnswer:
-            logging.warning(
+            logger.warning(
                 "%s (%s record) returned %s",
                 domain,
                 rdtype,
@@ -151,7 +152,7 @@ def probe_domain():
         except LifetimeTimeout as e:
             parser.error(f"failed to resolve domain: {e}")
         except NoNameservers as e:
-            logging.warning(
+            logger.warning(
                 "%s (%s record) returned error: %s", domain, rdtype, e
             )
 
@@ -166,9 +167,9 @@ def probe_domain():
             asdata = get_as_data(addr, "cymru")
             resp_data["ASN"].append(asdata.as_text())
     except NXDOMAIN:
-        logging.warning("%s (A record) returned %s", domain, "NXDOMAIN")
+        logger.warning("%s (A record) returned %s", domain, "NXDOMAIN")
     except NoAnswer:
-        logging.warning(
+        logger.warning(
             "%s (A record) returned %s", domain, "NODATA (no answer)"
         )
 
@@ -177,7 +178,7 @@ def probe_domain():
         if resp_data.get(d):
             output_data.update({d: resp_data.get(d)})
 
-    logging.debug("resp_data: %s", resp_data)
+    logger.debug("resp_data: %s", resp_data)
 
     if resp_data.get("ASN"):
         output_data.update({"ASN": "\n".join(resp_data["ASN"])})
