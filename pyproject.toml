@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "resolve-hosts"
 version = "0.2.3"
 authors = [
-    { name="Darren Spruell", email="dspruell@sancho2k.net" },
+    { name="Darren Spruell", email="phatbuckett@gmail.com" },
 ]
 description = "Resolve list of DNS hostnames."
 readme = "README.md"
