@@ -97,6 +97,8 @@ def resolve_hosts():
             answer = ["NXDOMAIN"]
         except NoAnswer:
             answer = ["NODATA (no answer)"]
+        except NoNameservers:
+            answer = ["nameservers failed (no answer)"]
         if args.json:
             resp_data.append({fqdn: [str(addr) for addr in answer]})
         else:
