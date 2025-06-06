@@ -132,9 +132,9 @@ def probe_domain():
     if domain_reg:
         resp_data.update({"WHOIS": domain_reg})
 
-    # Process SOA and NS records by converting to string blobs and adding to
+    # Process desired record types by converting to string blobs and adding to
     # output.
-    for rdtype in ("SOA", "NS"):
+    for rdtype in ("SOA", "NS", "MX", "TXT"):
         try:
             answer = resolver.resolve(domain, rdtype, search=False)
             resp_data.update({rdtype: str(answer.rrset)})
@@ -174,7 +174,7 @@ def probe_domain():
         )
 
     output_data = {}
-    for d in ["WHOIS", "SOA", "NS", "A"]:
+    for d in ["WHOIS", "SOA", "NS", "MX", "TXT", "A"]:
         if resp_data.get(d):
             output_data.update({d: resp_data.get(d)})
 
