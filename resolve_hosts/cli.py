@@ -99,6 +99,11 @@ def resolve_hosts():
             answer = ["NODATA (no answer)"]
         except NoNameservers:
             answer = ["nameservers failed (no answer)"]
+        except LifetimeTimeout:
+            answer = ["resolution failed (query lifetime exceeded)"]
+        except Exception as e:
+            answer = [f"query failed ({e})"]
+
         if args.json:
             resp_data.append({fqdn: [str(addr) for addr in answer]})
         else:
@@ -151,12 +156,16 @@ def probe_domain():
                 rdtype,
                 "NODATA (no answer)",
             )
-        except LifetimeTimeout as e:
-            parser.error(f"failed to resolve domain: {e}")
         except NoNameservers as e:
             logger.warning(
                 "%s (%s record) returned error: %s", domain, rdtype, e
             )
+        except LifetimeTimeout as e:
+            logger.warning(
+                "%s (%s record) query lifetime exceeded: %s", domain, rdtype, e
+            )
+        except Exception as e:
+            parser.error(f"failed to complete resolution: {e}")
 
     # Process A records by converting to string blobs and adding to output.
     # Additionally perform ASN lookups and add to output.
@@ -173,6 +182,10 @@ def probe_domain():
     except NoAnswer:
         logger.warning(
             "%s (A record) returned %s", domain, "NODATA (no answer)"
+        )
+    except Exception as e:
+        logger.warning(
+            "%s (A record) failed to complete resolution: %s", domain, e
         )
 
     output_data = {}
